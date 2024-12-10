@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background-color: #007bff;
+        }
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: white;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #f8f9fa;
+        }
+        .profile-image {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Blog Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('blogs') }}">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add_user">Add Users</a>
+                    </li>
+                   
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Manage Users</h2>
+
+        <!-- Add User Button -->
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">Add User</button>
+
+        <!-- Users Table -->
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Middle Name</th>
+                    <th>Age</th>
+                    <th>Birthday</th>
+                    <th>Contact Number</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Profile Image</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td>{{ user[3] }}</td>
+                    <td>{{ user[4] }}</td>
+                    <td>{{ user[5] }}</td>
+                    <td>{{ user[6] }}</td>
+                    <td>{{ user[7] }}</td>
+                    <td>{{ user[8] }}</td>
+                    <td>
+                        <img src="{{ url_for('static', filename='uploads/' + (user[10] if user[10] else 'default.jpg')) }}" alt="Profile Image" class="img-thumbnail" width="50">
+                    </td>
+                    <td>
+                        <!-- Edit and Delete actions -->
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" data-id="{{ user[0] }}" data-firstname="{{ user[1] }}" data-lastname="{{ user[2] }}" data-middlename="{{ user[3] }}" data-age="{{ user[4] }}" data-birthday="{{ user[5] }}" data-contact_number="{{ user[6] }}" data-username="{{ user[7] }}" data-email="{{ user[8] }}">Edit</button>
+                        <a href="{{ url_for('delete_user', user_id=user[0]) }}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="middlename" class="form-label">Middle Name</label>
+                            <input type="text" class="form-control" id="middlename" name="middlename">
+                        </div>
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="age" name="age" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="birthday" class="form-label">Birthday</label>
+                            <input type="date" class="form-control" id="birthday" name="birthday" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contact_number" class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" id="contact_number" name="contact_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profile_image" class="form-label">Profile Image</label>
+                            <input type="file" class="form-control" id="profile_image" name="profile_image">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="user_id" name="user_id">
+                    <div class="mb-3">
+                        <label for="edit_firstname" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="edit_firstname" name="firstname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_lastname" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="edit_lastname" name="lastname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_middlename" class="form-label">Middle Name</label>
+                        <input type="text" class="form-control" id="edit_middlename" name="middlename">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="edit_age" name="age" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_birthday" class="form-label">Birthday</label>
+                        <input type="date" class="form-control" id="edit_birthday" name="birthday" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_contact_number" class="form-label">Contact Number</label>
+                        <input type="text" class="form-control" id="edit_contact_number" name="contact_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="edit_username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_password" class="form-label">Password (Leave empty to keep current)</label>
+                        <input type="password" class="form-control" id="edit_password" name="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_confirm_password" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="edit_confirm_password" name="confirm_password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_profile_image" class="form-label">Profile Image</label>
+                        <input type="file" class="form-control" id="edit_profile_image" name="profile_image">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Pass user data to the edit modal
+        const editModal = document.getElementById('editUserModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-id');
+            const firstname = button.getAttribute('data-firstname');
+            const lastname = button.getAttribute('data-lastname');
+            const middlename = button.getAttribute('data-middlename');
+            const age = button.getAttribute('data-age');
+            const birthday = button.getAttribute('data-birthday');
+            const contactNumber = button.getAttribute('data-contact_number');
+            const username = button.getAttribute('data-username');
+            const email = button.getAttribute('data-email');
+
+            document.getElementById('user_id').value = userId;
+            document.getElementById('edit_firstname').value = firstname;
+            document.getElementById('edit_lastname').value = lastname;
+            document.getElementById('edit_middlename').value = middlename;
+            document.getElementById('edit_age').value = age;
+            document.getElementById('edit_birthday').value = birthday;
+            document.getElementById('edit_contact_number').value = contactNumber;
+            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_email').value = email;
+        });
+    </script>
+</body>
+</html>
