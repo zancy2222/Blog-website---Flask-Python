@@ -101,7 +101,6 @@
         </table>
     </div>
 
-    <!-- Add User Modal -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -111,6 +110,7 @@
                 </div>
                 <div class="modal-body">
                     <form method="POST" enctype="multipart/form-data">
+                        
                         <div class="mb-3">
                             <label for="firstname" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="firstname" name="firstname" required>
@@ -151,16 +151,14 @@
                             <label for="confirm_password" class="form-label">Confirm Password</label>
                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="profile_image" class="form-label">Profile Image</label>
-                            <input type="file" class="form-control" id="profile_image" name="profile_image">
-                        </div>
+                       
                         <button type="submit" class="btn btn-primary">Add User</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
 <!-- Edit User Modal -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">

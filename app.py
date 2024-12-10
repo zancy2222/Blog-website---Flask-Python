@@ -143,64 +143,89 @@ def profile():
 @app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
-        user_id = request.form['user_id']
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
-        middlename = request.form['middlename']
-        age = request.form['age']
-        birthday = request.form['birthday']
-        contact_number = request.form['contact_number']
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form.get('password')  # Using get to avoid KeyError
-        confirm_password = request.form.get('confirm_password')
-        profile_image = request.files.get('profile_image')
+        # Retrieve form data
+        user_id = request.form.get('user_id')  # Check if user_id exists for update
+        firstname = request.form.get('firstname')
+        lastname = request.form.get('lastname')
+        middlename = request.form.get('middlename')
+        age = request.form.get('age')
+        birthday = request.form.get('birthday')
+        contact_number = request.form.get('contact_number')
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')  # Optional
+        confirm_password = request.form.get('confirm_password')  # Optional
+        profile_image = request.files.get('profile_image')  # Optional
 
-        # Check if password is provided and confirm it matches
+        # Check for missing required fields (skip user_id check for new users)
+        if not all([firstname, lastname, age, birthday, contact_number, username, email]):
+            flash('All required fields must be filled!', 'danger')
+            return redirect(url_for('add_user'))
+
+        # Validate passwords if provided
         if password and password != confirm_password:
             flash('Passwords do not match!', 'danger')
             return redirect(url_for('add_user'))
 
-        # Update user in DB
         cur = mysql.connection.cursor()
-        
-        # If password is provided, hash and update it, else keep current password
-        if password:
-            password_hash = generate_password_hash(password)
-            cur.execute("""
-                UPDATE users 
-                SET firstname=%s, lastname=%s, middlename=%s, age=%s, birthday=%s, 
-                    contact_number=%s, username=%s, email=%s, password_hash=%s
-                WHERE id=%s
-            """, (firstname, lastname, middlename, age, birthday, contact_number, username, email, password_hash, user_id))
-        else:
-            cur.execute("""
-                UPDATE users 
-                SET firstname=%s, lastname=%s, middlename=%s, age=%s, birthday=%s, 
-                    contact_number=%s, username=%s, email=%s
-                WHERE id=%s
-            """, (firstname, lastname, middlename, age, birthday, contact_number, username, email, user_id))
 
-        # If a new profile image is uploaded, save it
-        if profile_image:
-            profile_image_filename = profile_image.filename
-            profile_image.save(f"static/profile_pics/{profile_image_filename}")
+        if user_id:  # Update existing user
+            # If password is provided, update the password hash
+            if password:
+                password_hash = generate_password_hash(password)
+                cur.execute("""
+                    UPDATE users 
+                    SET firstname=%s, lastname=%s, middlename=%s, age=%s, birthday=%s, 
+                        contact_number=%s, username=%s, email=%s, password_hash=%s
+                    WHERE id=%s
+                """, (firstname, lastname, middlename, age, birthday, contact_number, username, email, password_hash, user_id))
+            else:
+                cur.execute("""
+                    UPDATE users 
+                    SET firstname=%s, lastname=%s, middlename=%s, age=%s, birthday=%s, 
+                        contact_number=%s, username=%s, email=%s
+                    WHERE id=%s
+                """, (firstname, lastname, middlename, age, birthday, contact_number, username, email, user_id))
+
+            # Handle profile image upload if provided
+            if profile_image and profile_image.filename:
+                profile_image_filename = profile_image.filename
+                profile_image.save(f"static/uploads/{profile_image_filename}")
+                cur.execute("""
+                    UPDATE users 
+                    SET profile_image=%s 
+                    WHERE id=%s
+                """, (profile_image_filename, user_id))
+
+            flash('User updated successfully!', 'success')
+        else:  # Insert new user
+            # Validate passwords if provided for new users
+            if password != confirm_password:
+                flash('Passwords do not match!', 'danger')
+                return redirect(url_for('add_user'))
+
+            password_hash = generate_password_hash(password)
+
             cur.execute("""
-                UPDATE users SET profile_pic=%s WHERE id=%s
-            """, (profile_image_filename, user_id))
+                INSERT INTO users (firstname, lastname, middlename, age, birthday, contact_number, username, email, password_hash)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (firstname, lastname, middlename, age, birthday, contact_number, username, email, password_hash))
+
+            flash('User added successfully!', 'success')
 
         mysql.connection.commit()
         cur.close()
-
-        flash('User updated successfully!', 'success')
         return redirect(url_for('add_user'))
 
+    # Retrieve all users for display (both adding and editing scenarios)
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM users")
     users = cur.fetchall()
     cur.close()
 
     return render_template('add_users.html', users=users)
+
+
 
 @app.route('/delete_user/<int:user_id>', methods=['GET'])
 def delete_user(user_id):
